@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer - SciStudy Egypt</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-teal: #0F4C75;
+            --secondary-amber: #F8B500;
+            --accent-coral: #FF6B6B;
+            --neutral-charcoal: #2C3E50;
+            --bg-light: #FAFAFA;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+        }
+        
+        .heading-font {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .timer-circle {
+            transform: rotate(-90deg);
+        }
+        
+        .timer-progress {
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        .breathing-animation {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .geometric-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(15, 76, 117, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(248, 181, 0, 0.1) 0%, transparent 50%);
+        }
+        
+        .timer-active {
+            background: linear-gradient(135deg, #0F4C75, #3282b8);
+            color: white;
+        }
+        
+        .break-active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .achievement-badge {
+            animation: bounce 0.6s ease-in-out;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0,-15px,0); }
+            70% { transform: translate3d(0,-7px,0); }
+            90% { transform: translate3d(0,-2px,0); }
+        }
+    </style>
+</head>
+<body class="geometric-pattern">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="resources/app-icon.png" alt="SciStudy Egypt" class="w-10 h-10 rounded-lg">
+                    <div>
+                        <h1 class="heading-font text-xl font-bold text-gray-800">SciStudy Egypt</h1>
+                        <p class="text-sm text-gray-600 arabic-text">علمي للعلوم</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Translation</a>
+                    <a href="timer.html" class="text-teal-600 px-3 py-2 rounded-md text-sm font-medium bg-teal-50">Timer</a>
+                    <a href="study.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Study Tools</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-700 hover:text-teal-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Translation</a>
+                <a href="timer.html" class="block px-3 py-2 text-teal-600 bg-teal-50">Timer</a>
+                <a href="study.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Study Tools</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h2 class="heading-font text-4xl font-bold text-gray-800 mb-4">Pomodoro Study Timer</h2>
+            <p class="text-xl text-gray-600 arabic-text">مؤقت الدراسة بالطريقة البومودورية</p>
+            <p class="text-gray-500 mt-2">Focus. Study. Achieve. Repeat.</p>
+        </div>
+
+        <!-- Timer Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Timer Display -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                    <div class="mb-8">
+                        <div class="relative inline-block">
+                            <!-- Timer Circle -->
+                            <svg class="timer-circle w-64 h-64 mx-auto" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="90" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                <circle 
+                                    id="timer-progress" 
+                                    cx="100" cy="100" r="90" 
+                                    fill="none" stroke="#0F4C75" stroke-width="8"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="565.48"
+                                    stroke-dashoffset="565.48"
+                                    class="timer-progress"
+                                />
+                            </svg>
+                            
+                            <!-- Timer Display -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div id="timer-display" class="text-4xl font-bold text-gray-800 mb-2">25:00</div>
+                                    <div id="timer-phase" class="text-sm font-medium text-gray-600">Ready to Focus</div>
+                                    <div id="timer-session" class="text-xs text-gray-500 mt-1">Session 1 of 4</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pulse Ring when active -->
+                            <div id="pulse-ring" class="absolute inset-0 rounded-full border-4 border-teal-200 opacity-0"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Timer Controls -->
+                    <div class="flex justify-center space-x-4 mb-8">
+                        <button id="start-timer" class="px-8 py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                            Start Focus
+                        </button>
+                        <button id="pause-timer" class="px-8 py-3 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition-colors hidden">
+                            Pause
+                        </button>
+                        <button id="reset-timer" class="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors">
+                            Reset
+                        </button>
+                    </div>
+                    
+                    <!-- Timer Settings -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Focus Duration</label>
+                            <select id="focus-duration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="25">25 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">60 minutes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Short Break</label>
+                            <select id="short-break" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="5">5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="15">15 minutes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Long Break</label>
+                            <select id="long-break" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="15">15 minutes</option>
+                                <option value="20">20 minutes</option>
+                                <option value="30">30 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Subject Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Study Subject</label>
+                        <select id="study-subject" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                            <option value="general">General Study</option>
+                            <option value="biology">Biology - علم الأحياء</option>
+                            <option value="chemistry">Chemistry - كيمياء</option>
+                            <option value="physics">Physics - فيزياء</option>
+                            <option value="mathematics">Mathematics - رياضيات</option>
+                            <option value="computer">Computer Science - علم الحاسوب</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Session Stats -->
+            <div class="space-y-6">
+                <!-- Today's Progress -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="heading-font text-lg font-semibold text-gray-800 mb-4">Today's Progress</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Sessions Completed</span>
+                            <span class="font-semibold text-teal-600" id="sessions-today">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Total Focus Time</span>
+                            <span class="font-semibold text-teal-600" id="focus-time-today">0h 0m</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Study Streak</span>
+                            <span class="font-semibold text-teal-600" id="study-streak">0 days</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="heading-font text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button id="quick-5min" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            Quick 5-min Session
+                        </button>
+                        <button id="quick-review" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            Review Flashcards
+                        </button>
+                        <button id="take-notes" class="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                            Take Notes
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Current Session -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="heading-font text-lg font-semibold text-gray-800 mb-4">Current Session</h3>
+                    <div class="space-y-3">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-gray-800" id="current-subject">General Study</div>
+                            <div class="text-sm text-gray-600 arabic-text" id="current-subject-ar">دراسة عامة</div>
+                        </div>
+                        <div class="bg-gray-200 rounded-full h-2">
+                            <div id="session-progress" class="bg-teal-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 text-center">
+                            Progress: <span id="session-progress-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Break Activities -->
+        <div id="break-activities" class="bg-white rounded-2xl shadow-xl p-8 mb-12 hidden">
+            <h3 class="heading-font text-2xl font-bold text-gray-800 mb-6 text-center">Break Time! 🎉</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                    <div class="text-4xl mb-3">🚶‍♂️</div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Take a Walk</h4>
+                    <p class="text-sm text-gray-600">Get some fresh air and stretch your legs</p>
+                </div>
+                <div class="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                    <div class="text-4xl mb-3">🧘‍♀️</div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Deep Breathing</h4>
+                    <p class="text-sm text-gray-600">Practice mindfulness and relaxation</p>
+                </div>
+                <div class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                    <div class="text-4xl mb-3">💧</div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Hydrate</h4>
+                    <p class="text-sm text-gray-600">Drink water to stay refreshed</p>
+                </div>
+                <div class="text-center p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl">
+                    <div class="text-4xl mb-3">👀</div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Eye Rest</h4>
+                    <p class="text-sm text-gray-600">Look away from screens for 20 seconds</p>
+                </div>
+                <div class="text-center p-6 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl">
+                    <div class="text-4xl mb-3">🎵</div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Listen to Music</h4>
+                    <p class="text-sm text-gray-600">Enjoy your favorite calming tunes</p>
+                </div>
+                <div class="text-center p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl">
+                    <div class="text-4xl mb-3">📱</div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Quick Check</h4>
+                    <p class="text-sm text-gray-600">Check important messages briefly</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics and Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Weekly Progress Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                <h3 class="heading-font text-xl font-semibold text-gray-800 mb-6">Weekly Study Pattern</h3>
+                <div id="weekly-chart" style="height: 300px;"></div>
+            </div>
+            
+            <!-- Subject Distribution -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                <h3 class="heading-font text-xl font-semibold text-gray-800 mb-6">Study Time by Subject</h3>
+                <div id="subject-chart" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-12">
+            <h3 class="heading-font text-2xl font-bold text-gray-800 mb-6">Achievements 🏆</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl">
+                    <div class="text-3xl mb-2">🔥</div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Study Streak</h4>
+                    <p class="text-sm text-gray-600">7 days in a row</p>
+                    <div class="mt-2">
+                        <span class="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-xs font-medium">Achieved!</span>
+                    </div>
+                </div>
+                
+                <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                    <div class="text-3xl mb-2">⏰</div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Focus Master</h4>
+                    <p class="text-sm text-gray-600">25 focus sessions</p>
+                    <div class="mt-2">
+                        <span class="px-2 py-1 bg-blue-200 text-blue-800 rounded-full text-xs font-medium">Achieved!</span>
+                    </div>
+                </div>
+                
+                <div class="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Goal Crusher</h4>
+                    <p class="text-sm text-gray-600">Weekly goal met</p>
+                    <div class="mt-2">
+                        <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-xs font-medium">In Progress</span>
+                    </div>
+                </div>
+                
+                <div class="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                    <div class="text-3xl mb-2">🧠</div>
+                    <h4 class="font-semibold text-gray-800 mb-1">Knowledge Seeker</h4>
+                    <p class="text-sm text-gray-600">100 hours studied</p>
+                    <div class="mt-2">
+                        <span class="px-2 py-1 bg-purple-200 text-purple-800 rounded-full text-xs font-medium">Locked</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="resources/app-icon.png" alt="SciStudy Egypt" class="w-10 h-10 rounded-lg">
+                        <div>
+                            <h3 class="heading-font text-xl font-bold">SciStudy Egypt</h3>
+                            <p class="text-sm text-gray-400 arabic-text">علمي للعلوم</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm">Empowering Egyptian science students with comprehensive learning tools and scientific translation services.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Translation Tool</a></li>
+                        <li><a href="timer.html" class="hover:text-white transition-colors">Pomodoro Timer</a></li>
+                        <li><a href="study.html" class="hover:text-white transition-colors">Study Tools</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>Email: info@scistudy.eg</li>
+                        <li>Phone: +20 2 1234 5678</li>
+                        <li>Location: Cairo, Egypt</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2024 SciStudy Egypt. All rights reserved. Made with ❤️ for Egyptian science students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="timer.js"></script>
+</body>
+</html>

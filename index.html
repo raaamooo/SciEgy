@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F4C75">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SciStudy Egypt">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciStudy</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-teal: #0F4C75;
+            --secondary-amber: #F8B500;
+            --accent-coral: #FF6B6B;
+            --neutral-charcoal: #2C3E50;
+            --bg-light: #FAFAFA;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+        }
+        
+        .heading-font {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, #3282b8 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-teal), var(--secondary-amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .geometric-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(15, 76, 117, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(248, 181, 0, 0.1) 0%, transparent 50%);
+        }
+        
+        .typing-cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .flashcard {
+            perspective: 1000px;
+            height: 200px;
+        }
+        
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+        
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .favorite-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .favorite-btn.active {
+            color: var(--accent-coral);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="geometric-pattern">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="resources/app-icon.png" alt="SciStudy Egypt" class="w-10 h-10 rounded-lg">
+                    <div>
+                        <h1 class="heading-font text-xl font-bold text-gray-800">SciStudy Egypt</h1>
+                        <p class="text-sm text-gray-600 arabic-text">علمي للعلوم</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Translation</a>
+                    <a href="timer.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Timer</a>
+                    <a href="study.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Study Tools</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-700 hover:text-teal-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Translation</a>
+                <a href="timer.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Timer</a>
+                <a href="study.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Study Tools</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="heading-font text-4xl md:text-5xl font-bold mb-4">
+                        <span id="typed-text"></span>
+                        <span class="typing-cursor">|</span>
+                    </h2>
+                    <p class="text-xl mb-6 text-blue-100">Your comprehensive scientific translation and study companion designed for Egyptian science students.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="scrollToSection('translation')" class="bg-amber-500 hover:bg-amber-600 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors">
+                            Start Learning
+                        </button>
+                        <button onclick="scrollToSection('flashcards')" class="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors">
+                            Practice Flashcards
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="hero-science.png" alt="Science Learning" class="rounded-2xl shadow-2xl w-full h-auto">
+                    <div class="absolute -top-4 -right-4 w-20 h-20 bg-amber-500 rounded-full flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-teal-100 text-teal-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Terms Learned</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="terms-learned">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-amber-100 text-amber-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Study Streak</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="study-streak">0</p>
+                        <p class="text-xs text-gray-500">days</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-coral-100 text-coral-600" style="background-color: #fee2e2; color: #dc2626;">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Favorites</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="favorites-count">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-lg card-hover">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Study Time</p>
+                        <p class="text-2xl font-semibold text-gray-900" id="study-time">0</p>
+                        <p class="text-xs text-gray-500">hours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Translation Tool -->
+            <div id="translation" class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="heading-font text-2xl font-bold text-gray-800">Scientific Translator</h3>
+                    <div class="flex space-x-2">
+                        <button id="biology-filter" class="px-3 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700 hover:bg-teal-200 transition-colors">Biology</button>
+                        <button id="chemistry-filter" class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">Chemistry</button>
+                        <button id="physics-filter" class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors">Physics</button>
+                    </div>
+                </div>
+                
+                <div class="relative mb-4">
+                    <input 
+                        type="text" 
+                        id="translation-search" 
+                        placeholder="Search scientific terms in English..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    >
+                    <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-teal-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="search-results" class="search-results mb-4 hidden">
+                    <!-- Search results will be populated here -->
+                </div>
+                
+                <div id="translation-result" class="bg-gray-50 rounded-lg p-6 hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2" id="english-term"></h4>
+                            <p class="arabic-text text-2xl text-teal-700 mb-2" id="arabic-term"></p>
+                            <p class="text-sm text-gray-600 mb-2" id="transliteration"></p>
+                            <span class="inline-block px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs font-medium" id="term-category"></span>
+                        </div>
+                        <div class="flex flex-col space-y-2 ml-4">
+                            <button id="pronunciation-btn" class="p-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.828 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.828l3.555-3.793A1 1 0 019.383 3.076zM15 7a1 1 0 011 1v4a1 1 0 01-1 1h-1a1 1 0 01-1-1V8a1 1 0 011-1h1z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                            <button id="favorite-btn" class="favorite-btn p-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Recent Searches</h4>
+                    <div id="recent-searches" class="flex flex-wrap gap-2">
+                        <!-- Recent searches will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flashcard System -->
+            <div id="flashcards" class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="heading-font text-2xl font-bold text-gray-800">Flashcards</h3>
+                    <div class="flex items-center space-x-3">
+                        <select id="flashcard-subject" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500">
+                            <option value="all">All Subjects</option>
+                            <option value="biology">Biology</option>
+                            <option value="chemistry">Chemistry</option>
+                            <option value="physics">Physics</option>
+                            <option value="mathematics">Mathematics</option>
+                            <option value="computer">Computer Science</option>
+                        </select>
+                        <button id="study-mode-toggle" class="px-3 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 transition-colors">
+                            English → Arabic
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flashcard mb-6" id="flashcard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-200">
+                            <div>
+                                <p class="text-2xl font-semibold text-gray-800 mb-2" id="flashcard-term">Click start to begin</p>
+                                <p class="text-sm text-gray-600" id="flashcard-category">Select a subject</p>
+                            </div>
+                        </div>
+                        <div class="flashcard-back bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200">
+                            <div>
+                                <p class="arabic-text text-3xl font-bold text-teal-700 mb-2" id="flashcard-translation">اضغط على البطاقة لرؤية الترجمة</p>
+                                <p class="text-sm text-gray-600" id="flashcard-transliteration">Click to reveal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <button id="prev-card" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50">
+                        ← Previous
+                    </button>
+                    <div class="flex space-x-2">
+                        <button id="start-flashcards" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                            Start Study
+                        </button>
+                        <button id="flip-card" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">
+                            Flip Card
+                        </button>
+                    </div>
+                    <button id="next-card" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50">
+                        Next →
+                    </button>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
+                    <span>Card <span id="current-card">0</span> of <span id="total-cards">0</span></span>
+                    <div class="flex space-x-2">
+                        <button id="difficulty-hard" class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs hover:bg-red-200 transition-colors">Hard</button>
+                        <button id="difficulty-medium" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs hover:bg-yellow-200 transition-colors">Medium</button>
+                        <button id="difficulty-easy" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs hover:bg-green-200 transition-colors">Easy</button>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-200 rounded-full h-2 mb-4">
+                    <div id="progress-bar" class="bg-teal-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Mastered: <span id="mastered-count" class="font-semibold text-teal-600">0</span> cards</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Categories -->
+        <div class="mt-16">
+            <h3 class="heading-font text-3xl font-bold text-center text-gray-800 mb-12">Scientific Disciplines</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover text-center">
+                    <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Biology</h4>
+                    <p class="text-sm text-gray-600">علم الأحياء</p>
+                    <p class="text-xs text-gray-500 mt-2">45 terms</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a16.536 16.536 0 01-1.273 1.805C7.658 8.367 6.689 9 5.5 9c-2.636 0-5.5 1.275-5.5 3.5 0 1.667 1.333 3 3.5 3h11c2.367 0 4.5-1.333 4.5-3.5 0-2.225-2.864-3.5-5.5-3.5-1.189 0-2.158.633-2.805 1.195A16.536 16.536 0 0110.422 6H13a1 1 0 110 2H7V3a1 1 0 011-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Chemistry</h4>
+                    <p class="text-sm text-gray-600">كيمياء</p>
+                    <p class="text-xs text-gray-500 mt-2">38 terms</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Physics</h4>
+                    <p class="text-sm text-gray-600">فيزياء</p>
+                    <p class="text-xs text-gray-500 mt-2">42 terms</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Mathematics</h4>
+                    <p class="text-sm text-gray-600">رياضيات</p>
+                    <p class="text-xs text-gray-500 mt-2">35 terms</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-lg card-hover text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Computer Science</h4>
+                    <p class="text-sm text-gray-600">علم الحاسوب</p>
+                    <p class="text-xs text-gray-500 mt-2">28 terms</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="resources/app-icon.png" alt="SciStudy Egypt" class="w-10 h-10 rounded-lg">
+                        <div>
+                            <h3 class="heading-font text-xl font-bold">SciStudy Egypt</h3>
+                            <p class="text-sm text-gray-400 arabic-text">علمي للعلوم</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm">Empowering Egyptian science students with comprehensive learning tools and scientific translation services.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Translation Tool</a></li>
+                        <li><a href="timer.html" class="hover:text-white transition-colors">Pomodoro Timer</a></li>
+                        <li><a href="study.html" class="hover:text-white transition-colors">Study Tools</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>Email: info@scistudy.eg</li>
+                        <li>Phone: +20 2 1234 5678</li>
+                        <li>Location: Cairo, Egypt</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2024 SciStudy Egypt. All rights reserved. Made with ❤️ for Egyptian science students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="scientific_terms.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

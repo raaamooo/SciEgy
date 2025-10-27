@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tools - SciStudy Egypt</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Core Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-teal: #0F4C75;
+            --secondary-amber: #F8B500;
+            --accent-coral: #FF6B6B;
+            --neutral-charcoal: #2C3E50;
+            --bg-light: #FAFAFA;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+        }
+        
+        .heading-font {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        
+        .geometric-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(15, 76, 117, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(248, 181, 0, 0.1) 0%, transparent 50%);
+        }
+        
+        .notes-editor {
+            min-height: 400px;
+            resize: vertical;
+        }
+        
+        .note-card {
+            transition: all 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        .calendar-day {
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-day:hover {
+            background-color: #e0f2fe;
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.has-notes {
+            background-color: #0F4C75;
+            color: white;
+        }
+        
+        .calendar-day.today {
+            background-color: #F8B500;
+            color: #1f2937;
+            font-weight: bold;
+        }
+        
+        .goal-progress {
+            transition: width 0.5s ease;
+        }
+        
+        .floating-add-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="geometric-pattern">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="resources/app-icon.png" alt="SciStudy Egypt" class="w-10 h-10 rounded-lg">
+                    <div>
+                        <h1 class="heading-font text-xl font-bold text-gray-800">SciStudy Egypt</h1>
+                        <p class="text-sm text-gray-600 arabic-text">علمي للعلوم</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Translation</a>
+                    <a href="timer.html" class="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Timer</a>
+                    <a href="study.html" class="text-teal-600 px-3 py-2 rounded-md text-sm font-medium bg-teal-50">Study Tools</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-700 hover:text-teal-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Translation</a>
+                <a href="timer.html" class="block px-3 py-2 text-gray-700 hover:text-teal-600">Timer</a>
+                <a href="study.html" class="block px-3 py-2 text-teal-600 bg-teal-50">Study Tools</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h2 class="heading-font text-4xl font-bold text-gray-800 mb-4">Study Tools & Progress Tracker</h2>
+            <p class="text-xl text-gray-600 arabic-text">أدوات الدراسة وتتبع التقدم</p>
+            <p class="text-gray-500 mt-2">Organize your learning journey and track your academic progress.</p>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Notes Section -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="heading-font text-2xl font-bold text-gray-800">Study Notes</h3>
+                        <div class="flex space-x-2">
+                            <select id="subject-filter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All Subjects</option>
+                                <option value="biology">Biology</option>
+                                <option value="chemistry">Chemistry</option>
+                                <option value="physics">Physics</option>
+                                <option value="mathematics">Mathematics</option>
+                                <option value="computer">Computer Science</option>
+                            </select>
+                            <button id="new-note-btn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                                New Note
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes List -->
+                    <div id="notes-list" class="space-y-4 mb-6">
+                        <!-- Notes will be populated here -->
+                    </div>
+                    
+                    <!-- Notes Editor -->
+                    <div id="note-editor" class="hidden">
+                        <div class="mb-4">
+                            <input 
+                                type="text" 
+                                id="note-title" 
+                                placeholder="Note Title"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                            >
+                        </div>
+                        <div class="mb-4">
+                            <select id="note-subject" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="biology">Biology - علم الأحياء</option>
+                                <option value="chemistry">Chemistry - كيمياء</option>
+                                <option value="physics">Physics - فيزياء</option>
+                                <option value="mathematics">Mathematics - رياضيات</option>
+                                <option value="computer">Computer Science - علم الحاسوب</option>
+                            </select>
+                        </div>
+                        <textarea 
+                            id="note-content" 
+                            placeholder="Write your notes here... (Supports Arabic text)"
+                            class="notes-editor w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                        ></textarea>
+                        <div class="flex justify-end space-x-3 mt-4">
+                            <button id="cancel-note" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                                Cancel
+                            </button>
+                            <button id="save-note" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                                Save Note
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Dashboard -->
+            <div class="space-y-6">
+                <!-- Weekly Goals -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="heading-font text-lg font-semibold text-gray-800 mb-4">Weekly Goals</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-gray-600">Study Hours</span>
+                                <span class="text-sm font-semibold text-teal-600" id="study-hours-progress">12/20</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="goal-progress bg-teal-600 h-2 rounded-full" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-gray-600">Flashcards Mastered</span>
+                                <span class="text-sm font-semibold text-amber-600" id="flashcards-progress">45/60</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="goal-progress bg-amber-500 h-2 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-gray-600">Notes Created</span>
+                                <span class="text-sm font-semibold text-coral-600" id="notes-progress">8/15</span>
+                            </div>
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="goal-progress h-2 rounded-full" style="width: 53%; background-color: #FF6B6B;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="set-goals-btn" class="w-full mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                        Update Goals
+                    </button>
+                </div>
+                
+                <!-- Study Calendar -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="heading-font text-lg font-semibold text-gray-800 mb-4">Study Calendar</h3>
+                    <div id="study-calendar" class="grid grid-cols-7 gap-1 text-center">
+                        <!-- Calendar will be populated here -->
+                    </div>
+                    <div class="flex justify-between items-center mt-4 text-xs text-gray-500">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-teal-600 rounded"></div>
+                            <span>Study Day</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-amber-500 rounded"></div>
+                            <span>Today</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <h3 class="heading-font text-lg font-semibold text-gray-800 mb-4">Quick Stats</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Total Notes</span>
+                            <span class="font-semibold text-gray-800" id="total-notes">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">This Week</span>
+                            <span class="font-semibold text-gray-800" id="notes-this-week">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Favorite Subject</span>
+                            <span class="font-semibold text-teal-600" id="favorite-subject">Biology</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Progress Over Time -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                <h3 class="heading-font text-xl font-semibold text-gray-800 mb-6">Learning Progress</h3>
+                <div id="progress-chart" style="height: 300px;"></div>
+            </div>
+            
+            <!-- Subject Distribution -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                <h3 class="heading-font text-xl font-semibold text-gray-800 mb-6">Notes by Subject</h3>
+                <div id="notes-subject-chart" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <!-- Study Groups -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="heading-font text-2xl font-bold text-gray-800">Study Groups</h3>
+                <button id="create-group-btn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                    Create Group
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="border border-gray-200 rounded-xl p-4 hover:border-teal-300 transition-colors">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                            <span class="text-teal-600 font-semibold">B</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Biology Study Group</h4>
+                            <p class="text-sm text-gray-600">12 members</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">Preparing for midterm exams - Cell biology and genetics</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Active 2h ago</span>
+                        <button class="px-3 py-1 bg-teal-600 text-white rounded text-xs hover:bg-teal-700 transition-colors">
+                            Join
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-xl p-4 hover:border-teal-300 transition-colors">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="text-blue-600 font-semibold">C</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Chemistry Lab</h4>
+                            <p class="text-sm text-gray-600">8 members</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">Organic chemistry reactions and mechanisms discussion</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Active 1h ago</span>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors">
+                            Join
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-xl p-4 hover:border-teal-300 transition-colors">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span class="text-purple-600 font-semibold">P</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Physics Problem Solving</h4>
+                            <p class="text-sm text-gray-600">15 members</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">Weekly problem-solving sessions for mechanics and thermodynamics</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Active 30m ago</span>
+                        <button class="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 transition-colors">
+                            Join
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Add Button -->
+    <button id="floating-add-btn" class="floating-add-btn w-14 h-14 bg-teal-600 text-white rounded-full shadow-lg hover:bg-teal-700 transition-colors flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+    </button>
+
+    <!-- Goals Modal -->
+    <div id="goals-modal" class="fixed inset-0 bg-black/50 modal hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 modal-content">
+            <h3 class="heading-font text-2xl font-bold text-gray-800 mb-6">Update Weekly Goals</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Study Hours per Week</label>
+                    <input type="number" id="goal-study-hours" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" value="20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Flashcards to Master</label>
+                    <input type="number" id="goal-flashcards" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" value="60">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes to Create</label>
+                    <input type="number" id="goal-notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" value="15">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button id="cancel-goals" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+                <button id="save-goals" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+                    Save Goals
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="resources/app-icon.png" alt="SciStudy Egypt" class="w-10 h-10 rounded-lg">
+                        <div>
+                            <h3 class="heading-font text-xl font-bold">SciStudy Egypt</h3>
+                            <p class="text-sm text-gray-400 arabic-text">علمي للعلوم</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm">Empowering Egyptian science students with comprehensive learning tools and scientific translation services.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Translation Tool</a></li>
+                        <li><a href="timer.html" class="hover:text-white transition-colors">Pomodoro Timer</a></li>
+                        <li><a href="study.html" class="hover:text-white transition-colors">Study Tools</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li>Email: info@scistudy.eg</li>
+                        <li>Phone: +20 2 1234 5678</li>
+                        <li>Location: Cairo, Egypt</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2024 SciStudy Egypt. All rights reserved. Made with ❤️ for Egyptian science students.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="study.js"></script>
+</body>
+</html>
